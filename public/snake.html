@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        /* CSS styles for the game board */
+        #game-board {
+            width: 420px;
+            display: grid;
+            grid-template-columns: repeat(20, 20px);
+            grid-template-rows: repeat(20, 20px);
+            gap: 1px;
+            background-color: #333;
+        }
+
+        .cell {
+            width: 20px;
+            height: 20px;
+            background-color: #fff;
+        }
+
+        .snake {
+            background-color: #00ff00; /* Green color for snake */
+        }
+
+        .food {
+            background-color: #ff0000; /* Red color for food */
+        }
+
+        #score {
+            color: #0c0000;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Snake Game</h1>
+    <div id="game-board"></div>
+    <div id="score">Score: 0</div>
+
+    <script>
+        // JavaScript code for the game logic
+        const board = document.getElementById('game-board');
+        const scoreDisplay = document.getElementById('score');
+
+        // Define initial snake position and direction
+        let snake = [{ x: 10, y: 10 }];
+        let direction = { x: 0, y: 0 };
+        let food = getRandomPosition();
+
+        // Main game loop
+        setInterval(() => {
+            moveSnake();
+            if (isSnakeCollision()) {
+                gameOver();
+            }
+            if (isFoodEaten()) {
+                eatFood();
+            }
+            draw();
+        }, 100);
+
+        // Handle key presses to change direction
+        document.addEventListener('keydown', (event) => {
+            switch (event.key) {
+                case 'ArrowUp':
+                    direction = { x: 0, y: -1 };
+                    break;
+                case 'ArrowDown':
+                    direction = { x: 0, y: 1 };
+                    break;
+                case 'ArrowLeft':
+                    direction = { x: -1, y: 0 };
+                    break;
+                case 'ArrowRight':
+                    direction = { x: 1, y: 0 };
+                    break;
+            }
+        });
+
+        // Move the snake based on the current direction
+        function moveSnake() {
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+            snake.unshift(head);
+            if (!isFoodEaten()) {
+                snake.pop();
+            }
+        }
+
+        // Check if the snake collides with itself or the wall
+        function isSnakeCollision() {
+            const head = snake[0];
+            return (
+                head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 ||
+                snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y)
+            );
+        }
+
+        // Check if the snake eats the food
+        function isFoodEaten() {
+            const head = snake[0];
+            return head.x === food.x && head.y === food.y;
+        }
+
+        // Generate a random position for the food
+        function getRandomPosition() {
+            return {
+                x: Math.floor(Math.random() * 20),
+                y: Math.floor(Math.random() * 20)
+            };
+        }
+
+        // Handle when the snake eats the food
+        function eatFood() {
+            food = getRandomPosition();
+            scoreDisplay.textContent = `Score: ${snake.length - 1}`;
+        }
+
+        // Draw the snake and food on the game board
+        function draw() {
+            board.innerHTML = '';
+            snake.forEach(segment => {
+                const div = document.createElement('div');
+                div.className = 'cell snake';
+                div.style.gridColumn = segment.x + 1;
+                div.style.gridRow = segment.y + 1;
+                board.appendChild(div);
+            });
+            const foodDiv = document.createElement('div');
+            foodDiv.className = 'cell food';
+            foodDiv.style.gridColumn = food.x + 1;
+            foodDiv.style.gridRow = food.y + 1;
+            board.appendChild(foodDiv);
+        }
+
+        // Handle game over
+        function gameOver() {
+            alert(`Game Over! Your score is ${snake.length - 1}`);
+            snake = [{ x: 10, y: 10 }];
+            direction = { x: 0, y: 0 };
+            food = getRandomPosition();
+            scoreDisplay.textContent = 'Score: 0';
+        }
+    </script>
+</body>
+</html>
